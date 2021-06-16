@@ -20,9 +20,12 @@ $ pip install switchlib
 
 This list of devices can be considered incomplete, and is subject to expansion.
 
-- Brocade 7250
-- Brocade 7450
-- Brocade 7750
+In development:
+- Brocade ICX 7450
+
+Awaiting development:
+- Brocade ICX 7250
+- Brocade ICX 7750
 - Cisco Catalyst 2960
 - Cisco Catalyst 9300
 - Cisco Catalyst 9400
