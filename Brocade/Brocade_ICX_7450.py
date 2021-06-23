@@ -105,7 +105,7 @@ class Brocade_ICX_7450:
 			return -1
 
 		# Other bad error.
-		except Exception as error:
+		except:
 
 			self.log(f"Could not connect to switch via SSH. Another error occurred.")
 			traceback.print_exc()
@@ -123,7 +123,6 @@ class Brocade_ICX_7450:
 
 		import traceback
 
-		# Send the command.
 		self.log(f"Sending command: {cmd}")
 
 		# Try to send the command and receive a raw response.
@@ -150,3 +149,22 @@ class Brocade_ICX_7450:
 
 		return output
 
+	def ping(self, ip):
+		"""
+		Ping another device from the switch using the device's IP address. Return the
+		latency in seconds, or -1 if timed out.
+		"""
+
+		import re
+
+		self.log(f"Pinging {ip}.")
+
+		# Send the command and parse it for latency.
+		if (output := self.send_cmd(f"ping {ip}")) != -1:
+
+			# Return the time in seconds as an output.
+			if len(q := re.findall("time=(\d+)ms", output)) > 0:
+				return float(q[0]) / 1000
+
+		# Default return is only reached in case of a timeout.
+		return -1
