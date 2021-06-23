@@ -8,6 +8,10 @@ class Brocade_ICX_7450:
 	# Configuration object.
 	config = None
 
+	# Logging function and standard args.
+	log = None
+	std = None
+
 	# IP address.
 	ip = None
 
@@ -48,14 +52,14 @@ class Brocade_ICX_7450:
 
 		from _common import output
 
-		# Load the logging function.
-		self.log = output.log
-
 		# Load the config.
 		self.config = config
 
 		# Load IP address.
 		self.ip = ip
+
+		# Load the logging function.
+		self.log = lambda msg: output.log(msg, self.ip, self.config.output, self.config.suppress)
 
 		# Haven't connected to switch yet.
 		self.connected = False
@@ -73,7 +77,7 @@ class Brocade_ICX_7450:
 		# Load an SSH connection into self.connection.
 		try:
 
-			self.log("Attempting to connect to switch via SSH.", self.ip, self.config.output, self.config.suppress)
+			self.log("Attempting to connect to switch via SSH.")
 
 			self.connection = netmiko.ConnectHandler(
 				global_delay_factor=4,
@@ -86,14 +90,14 @@ class Brocade_ICX_7450:
 			self.connection.enable()
 			self.connected = True
 
-			self.log("SSH connection successfully established.", self.ip, self.config.output, self.config.suppress)
+			self.log("SSH connection successfully established.")
 
 			return 0
 
 		# Bad login credentials.
 		except netmiko.ssh_exception.AuthenticationException:
 
-			self.log("SSH connection failed. Bad credentials.", self.ip, self.config.output, self.config.suppress)
+			self.log("SSH connection failed. Bad credentials.")
 
 			self.connection  = None
 			self.connected   = False
@@ -103,11 +107,46 @@ class Brocade_ICX_7450:
 		# Other bad error.
 		except Exception as error:
 
-			self.log(f"Could not connect to switch via SSH. Another error occurred.", self.ip)
+			self.log(f"Could not connect to switch via SSH. Another error occurred.")
 			traceback.print_exc()
 
 			self.connection  = None
 			self.connected   = False
 
 			return -2
+
+	def send_cmd(self, cmd, expect=None):
+		"""
+		Send a command to the switch and return the output. The expect string is
+		the string of characters at which to stop scanning for output.
+		"""
+
+		import traceback
+
+		# Send the command.
+		self.log(f"Sending command: {cmd}")
+
+		# Try to send the command and receive a raw response.
+		try:
+
+			if expect:
+				output = self.connection.send_command(cmd, expect_string=expect)
+			else:
+				output = self.connection.send_command(cmd)
+
+		# Other bad error.
+		except:
+
+			self.log(f"could not send command to switch. another error occurred.")
+			traceback.print_exc()
+
+			return -1
+
+		self.log("command successfully sent. response:")
+
+		# Output the response.
+		for line in output.split("\n"):
+			self.log(f"| {line}")
+
+		return output
 
