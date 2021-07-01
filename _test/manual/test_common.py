@@ -29,8 +29,8 @@ def main(args):
 
 		print("Manual Common Tests")
 		print("'o' means optional.")
-		print("config    ./test_common config <oOUTPUT> <oSUPPRESS: 'T' || 'F'>")
-		print("log       ./test_common log <MESSAGE> <oIP> <oOUTPUT> <oSUPPRESS: 'T' || 'F'>")
+		print("config    ./test_common.py config <oOUTPUT> <oSUPPRESS: 'T' || 'F'>")
+		print("log       ./test_common.py log <MESSAGE> <oIP> <oOUTPUT> <oSUPPRESS: 'T' || 'F'>")
 
 		return -1
 
