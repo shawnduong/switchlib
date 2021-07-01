@@ -8,9 +8,8 @@ class Brocade_ICX_7450:
 	# Configuration object.
 	config = None
 
-	# Logging function and standard args.
+	# Logging function.
 	log = None
-	std = None
 
 	# IP address.
 	ip = None
