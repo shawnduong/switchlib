@@ -204,7 +204,7 @@ class Brocade_ICX_7450:
 		self.log(f"Pinging {ip}.")
 
 		# Send the command and parse it for latency.
-		if (output := self.send_cmd(f"ping {ip}")) != -1:
+		if (output := self.send_cmd(f"ping {ip}")) == -1:
 
 			# Return the time in seconds as an output.
 			if len(q := re.findall("time=(\d+)ms", output)) > 0:
@@ -213,51 +213,80 @@ class Brocade_ICX_7450:
 		# Default return is only reached in case of a timeout.
 		return -1
 
-	def tacacsp_setup(self, ips, key, enable=True):
+	def tacacsp_setup(self, servers, key=False, wsmode="tl", lmode="tle"):
 		"""
 		Add TACACS+ servers using the servers' IP addresses. Return 0 if success,
-		or a negative if failed. The key is required to be passed. For convenience,
-		enabling password for authentication is also able to be done here.
+		or a negative if failed. The key is required to be passed.
+
+		wsmode describes the web-server mode. lmode describes the login mode.
+		These may take any combination of "l" (local), "t" (TACACS+), and "e"
+		(enable), or alternatively "d" (disable, and do not set up).
 		"""
 
 		# If only adding one IP given str, turn it into a single-member list.
-		if type(ips) is str:
-			ips = [ips]
+		if type(servers) is str:
+			servers= [servers]
 
-		self.log(f"Preparing to add {len(ips)} TACACS+ server%s." % ("s" if len(ips) != 1 else ""))
+		self.log(f"Preparing to add {len(servers)} TACACS+ server%s." % ("s" if len(servers) != 1 else ""))
 
 		# Enter config mode.
 		self.config_mode_enter()
 
-		# aaa authentication web-server default tacacs+ local
-		if self.send_cmd("aaa authentication web-server default tacacs+ local") == -1:
-			return -2
+		# Configure the web server if "d" not in wsmode.
+		if "d" not in wsmode:
 
-		# aaa authentication login default tacacs+ local (optional: enable)
-		if enable:
-			if self.send_cmd("aaa authentication login default tacacs+ local enable") == -1:
-				return -3
-		else:
-			if self.send_cmd("aaa authentication login default tacacs+ local") == -1:
-				return -4
+			cmd = "aaa authentication web-server default"
+
+			if "t" in wsmode:
+				cmd += " tacacs+"
+
+			if "l" in wsmode:
+				cmd += " local"
+
+			if "e" in wsmode:
+				cmd += " enable"
+
+			# Set up TACACS+ on the web server.
+			# aaa authentication web-server default <options>
+			if self.send_cmd(cmd) < 0:
+				return -1
+
+		# Configure the login if "d" not in lmode.
+		if "d" not in lmode:
+
+			cmd = "aaa authentication login default"
+
+			if "t" in wsmode:
+				cmd += " tacacs+"
+
+			if "l" in wsmode:
+				cmd += " local"
+
+			if "e" in wsmode:
+				cmd += " enable"
+
+			# Set up TACACS+ on the login
+			# aaa authentication login default <options>
+			if self.send_cmd(cmd) < 0:
+				return -2
 
 		# aaa authorization exec default tacacs+
-		if self.send_cmd("aaa authorization exec default tacacs+") == -1:
-			return -5
+		if self.send_cmd("aaa authorization exec default tacacs+") < 0:
+			return -3
 
 		# tacacs-server host <ip> (for all IPs)
-		for ip in ips:
+		for ip in servers:
 
 			self.log(f"Adding TACACS+ server {ip}.")
 
-			if self.send_cmd(f"tacacs-server host {ip}") == -1:
-				return -6
+			if self.send_cmd(f"tacacs-server host {ip}") < 0:
+				return -4
 
 		self.log("Adding TACACS server key.")
 
 		# tacacs-server key <key>
-		if self.send_cmd(f"tacacs-server key {key}", None, True) == -1:
-			return -7
+		if self.send_cmd(f"tacacs-server key {key}", None, True) < 0:
+			return -5
 
 		# Exiting config mode.
 		self.config_mode_exit()

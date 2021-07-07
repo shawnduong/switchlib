@@ -71,14 +71,20 @@ def test_tacacsp_setup(args):
 	# Break up the IPs into a list.
 	ips = args[2].split(" ")
 
-	# Parse the enable setting.
-	if len(args) == 4:
-		enable = True if args[-1].startswith("T") else False
+	# Parse the web-server mode.
+	if len(args) > 3:
+		wsmode = args[3]
 	else:
-		enable = True
+		wsmode = "tl"
+
+	# Parse the local mode.
+	if len(args) > 4:
+		lmode = args[4]
+	else:
+		lmode = "tle"
 
 	# Test TACACS+ setup.
-	print(f"(Test) {device.tacacsp_setup(ips, key, enable)}")
+	print(f"(Test) {device.tacacsp_setup(ips, key, wsmode, lmode)}")
 
 def test_tacacsp_config_enable(args):
 
@@ -115,7 +121,7 @@ def main(args):
 		print("send_cmd                     ./test_Brocade_ICX_7450.py send_cmd <IP> <USER> <CMD> <oEXPECT>")
 		print("                                 ? If the command contains spaces, wrap all of <CMD> in quotes.")
 		print("ping                         ./test_Brocade_ICX_7450.py ping <IP> <USER> <TARGET_IP>")
-		print("tacacsp_setup                ./test_Brocade_ICX_7450.py tacacsp_setup <IP> <USER> <TARGET_IPS> <oENABLE: 'T' || 'F'>")
+		print("tacacsp_setup                ./test_Brocade_ICX_7450.py tacacsp_setup <IP> <USER> <TARGET_IPS> <oWSMODE> <oLMODE>")
 		print("                                 ? If there are multiple target IPs, wrap all of <TARGET_IPS> in quotes and separate")
 		print("                                   each individual IP using spaces.")
 		print("tacacsp_config_enable        ./test_Brocade_ICX_7450.py tacacsp_config_enable <IP> <USER> <VLAN_ID>")
