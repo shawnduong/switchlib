@@ -204,10 +204,10 @@ class Brocade_ICX_7450:
 		self.log(f"Pinging {ip}.")
 
 		# Send the command and parse it for latency.
-		if (output := self.send_cmd(f"ping {ip}")) == -1:
+		if type(output := self.send_cmd(f"ping {ip}")) is not int:
 
 			# Return the time in seconds as an output.
-			if len(q := re.findall("time=(\d+)ms", output)) > 0:
+			if len(q := re.findall("time[<|=](\d+)ms", output)) > 0:
 				return float(q[0]) / 1000
 
 		# Default return is only reached in case of a timeout.
@@ -248,7 +248,7 @@ class Brocade_ICX_7450:
 
 			# Set up TACACS+ on the web server.
 			# aaa authentication web-server default <options>
-			if self.send_cmd(cmd) < 0:
+			if type(output := self.send_cmd(cmd)) is int and output < 0:
 				return -1
 
 		# Configure the login if "d" not in lmode.
@@ -256,22 +256,22 @@ class Brocade_ICX_7450:
 
 			cmd = "aaa authentication login default"
 
-			if "t" in wsmode:
+			if "t" in lmode:
 				cmd += " tacacs+"
 
-			if "l" in wsmode:
+			if "l" in lmode:
 				cmd += " local"
 
-			if "e" in wsmode:
+			if "e" in lmode:
 				cmd += " enable"
 
 			# Set up TACACS+ on the login
 			# aaa authentication login default <options>
-			if self.send_cmd(cmd) < 0:
+			if type(output := self.send_cmd(cmd)) is int and output < 0:
 				return -2
 
 		# aaa authorization exec default tacacs+
-		if self.send_cmd("aaa authorization exec default tacacs+") < 0:
+		if type(output := self.send_cmd("aaa authorization exec default tacacs+")) is int and output < 0:
 			return -3
 
 		# tacacs-server host <ip> (for all IPs)
@@ -279,13 +279,13 @@ class Brocade_ICX_7450:
 
 			self.log(f"Adding TACACS+ server {ip}.")
 
-			if self.send_cmd(f"tacacs-server host {ip}") < 0:
+			if type(output := self.send_cmd(f"tacacs-server host {ip}")) is int and output < 0:
 				return -4
 
 		self.log("Adding TACACS server key.")
 
 		# tacacs-server key <key>
-		if self.send_cmd(f"tacacs-server key {key}", None, True) < 0:
+		if type(output := self.send_cmd(f"tacacs-server key {key}", None, True)) is int and output < 0:
 			return -5
 
 		# Exiting config mode.
@@ -303,7 +303,7 @@ class Brocade_ICX_7450:
 		# Enter config mode.
 		self.config_mode_enter()
 
-		if self.send_cmd(f"tacacs-server enable vlan {vlanid}") == -1:
+		if type(output := self.send_cmd(f"tacacs-server enable vlan {vlanid}")) is int and output < 0:
 			return -1
 
 		# Exit config mode.
@@ -321,7 +321,7 @@ class Brocade_ICX_7450:
 		# Enter config mode.
 		self.config_mode_enter()
 
-		if self.send_cmd(f"tacacs-server retransmit {n}") == -1:
+		if type(output := self.send_cmd(f"tacacs-server retransmit {n}")) is int and output < 0:
 			return -1
 
 		# Exit config mode.
@@ -339,7 +339,7 @@ class Brocade_ICX_7450:
 		# Enter config mode.
 		self.config_mode_enter()
 
-		if self.send_cmd(f"tacacs-server timeout {n}") == -1:
+		if type(output := self.send_cmd(f"tacacs-server timeout {n}")) is int and output < 0:
 			return -1
 
 		# Exit config mode.

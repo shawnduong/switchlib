@@ -100,7 +100,7 @@ def test_tacacsp_config_retransmit(args):
 	device = init(args[0], args[1])
 
 	# Set the retransmit to N seconds.
-	print(f"(Test) {device.tacacsp_config_retransmit(args[2])}")
+	print(f"(Test) {device.tacacsp_config_retransmit(int(args[2]))}")
 
 def test_tacacsp_config_timeout(args):
 
@@ -108,7 +108,7 @@ def test_tacacsp_config_timeout(args):
 	device = init(args[0], args[1])
 
 	# Set the timeout to N seconds.
-	print(f"(Test) {device.tacacsp_config_timeout(args[2])}")
+	print(f"(Test) {device.tacacsp_config_timeout(int(args[2]))}")
 
 def main(args):
 
