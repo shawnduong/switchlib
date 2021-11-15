@@ -1,3 +1,7 @@
+# Notice
+
+Unfortunately, my focus at work has been directed elsewhere. I no longer have the time nor the resources to work on this project. This is an abandoned project, and this repository has been archived.
+
 # switchlib
 
 Python library for interacting with Cisco and Brocade network switches\*. Written and documented for the average network engineer.
